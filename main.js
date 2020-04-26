@@ -12,7 +12,7 @@ spritesheet.onload = () => {
     Promise.all(cib)
     .then(res => {
         sprites = res;
-
+        
         animController.addAnimation('idle');
         animController.addAnimation('attack');
         animController.addAnimation('damaged');

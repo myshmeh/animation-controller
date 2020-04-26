@@ -14,10 +14,15 @@ class Graph {
         return true;
     }
 
-    addEdge(src, dest) {
-        if (!this.vertices.has(src) || !this.vertices.has(dest))
+    /**
+     * 
+     * @param {*} src - name of node (string)
+     * @param {*} destData - {target: dest name, isTransitionable: Function}
+     */
+    addEdge(src, destData) {
+        if (!this.vertices.has(src) || !this.vertices.has(destData.target))
             return false;
-        this.vertices.get(src).edges.push(dest);
+        this.vertices.get(src).edges.push(destData);
         return true;
     }
 
@@ -30,6 +35,11 @@ class Graph {
     getVertexData(vertex) {
         if (!this.vertices.has(vertex)) return false;
         return this.vertices.get(vertex).data;
+    }
+
+    getVertexEdges(vertex) {
+        if (!this.vertices.has(vertex)) return false;
+        return this.vertices.get(vertex).edges;
     }
 
     deleteVertex(vertex) {
@@ -130,10 +140,10 @@ class AnimationController{
     }
 
     updateAnimationState() {
-        const currAnim = this.animGraph.getVertexData(this.state);
-        for(let trans of currAnim.transitions) {
-            if (!trans.isTransitionable(this.params)) continue;
-            this.setAnimationState(trans.target);
+        const currAnimEdges = this.animGraph.getVertexEdges(this.state);
+        for(let edge of currAnimEdges) {
+            if (!edge.isTransitionable(this.params)) continue;
+            this.setAnimationState(edge.target);
             break;
         }
     }
@@ -153,19 +163,18 @@ class AnimationController{
             sprites: sprites,
             frameInterval: frameInterval,
             repeatable: repeatable,
-            transitions: [],
         });
         return true;
     }
     
     connectAnimation(src, dest, isTransitionable) {
-        this.animGraph.addEdge(src, dest);
-        const srcData = this.animGraph.getVertexData(src);
-        srcData.transitions.push({
-            target: dest,
-            isTransitionable: isTransitionable,
-        });
-        this.animGraph.setVertexData(src, srcData);
+        this.animGraph.addEdge(
+            src, 
+            {
+                target: dest,
+                isTransitionable: isTransitionable,
+            }
+        );
     }
     
     getCurrentSprite() {
